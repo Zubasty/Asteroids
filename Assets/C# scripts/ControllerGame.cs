@@ -131,34 +131,53 @@ public class ControllerGame : MonoBehaviour
     //Обработчик события смерти врага, удаляем информацию о нем
     void OnDieEnemy(Enemy enemy)
     {
+        //Пытаемся преобразовать переменную врага в астероид
         Asteroid a = enemy as Asteroid;
+        //Если получилось
         if (a)
         {
+            //То перебираем то, во что астероид должен
+            //превратиться после смерти
             foreach(Asteroid ast in a.PublicAsteroids)
             {
-                //Добавляем обработчик события для новых астероидов
+                //Если новый астероид существует
                 if(ast)
                 {
+                    //Добавляем его в список врагов
                     Enemies.Add(ast);
+                    //Добавляем обработчики события смерти для новых астероидов
                     ast.DieEvent.AddListener(delegate { OnDieEnemy(ast); });
                     ast.DieEvent.AddListener(delegate { OnDieEnemyPlusScore(ast); });
                 }
             }
         }
+        //Удаляем врага из ббщего списка врагов
         Enemies.Remove(enemy);
     }
     //Обработчик события смерти врага, начисляем деньги
     void OnDieEnemyPlusScore(Enemy enemy)
     {
+        //Переменная для определения кол-ва очков
         int sc = 0;
+        //Если враг - это космический корабль
         if(enemy is EnemySpaceShip)
         {
+            //То плюс 50 очков
             sc = 50;
         }
+        //иначе
         else
         {
+            //Расчитываем количество очков за уничтоженный астероид
+            /*
+            Самый маленький астероид - 40 очков, маленький средний - 30
+            средний большой - 20, самый большой - 10.
+            f(0)=40, f(1)=30, f(2)=20, f(1)=10, т.о.
+            f(x)=-10*x+40
+             */
             sc = -10 * (int)((Asteroid)enemy).TypeAsteroid + 40;
         }
+        //Создаем доп.начисление очков
         InstantiateTextScorePlus(sc, ((MonoBehaviour)enemy).transform.position);
     }
     private void Awake()
@@ -267,6 +286,7 @@ public class ControllerGame : MonoBehaviour
     //Функция создания текста после смерти врага
     private void InstantiateTextScorePlus(int sc, Vector2 pos)
     {
+        //Добавляем очки
         Score += sc;
         //Создаем экземпляр текста
         TextMesh txt = Instantiate(PrefText);
@@ -307,7 +327,7 @@ public class ControllerGame : MonoBehaviour
         Asteroid a = (Asteroid)Enemies[Enemies.Count - 1];
         //Задаем ему случайный тип
         a.TypeAsteroid = (typeAsteroid)Random.Range(0, 4);
-        //Добавляем обработчик события смерти астероида
+        //Добавляем обработчики события смерти астероида
         a.DieEvent.AddListener(delegate { OnDieEnemy(a); });
         a.DieEvent.AddListener(delegate { OnDieEnemyPlusScore(a); });
     }
@@ -320,13 +340,12 @@ public class ControllerGame : MonoBehaviour
         EnemySpaceShip ESS = (EnemySpaceShip)Enemies[Enemies.Count - 1];
         //Передаем ссылку на игрока
         ESS.Player = Player;
-        //Добавляем обработчик события смерти вражеского космического корабля
+        //Добавляем обработчики события смерти вражеского космического корабля
         ESS.DieEvent.AddListener(delegate { OnDieEnemy(ESS); });
         ESS.DieEvent.AddListener(delegate { OnDieEnemyPlusScore(ESS); });
     }
     private void Update()
     {
-        Debug.Log(timeSpawn);
         //Если не пауза
         if(!Pause)
         {
