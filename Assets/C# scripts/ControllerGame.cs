@@ -71,7 +71,8 @@ public class ControllerGame : MonoBehaviour
             //отключаем/включаем звук у префаба вражеского космического корабля
             EnemySpacePref.GetComponent<AudioSource>().mute = !sound_on;
             //отключаем/включаем звук у игрока
-            Player.GetComponent<AudioSource>().mute = !sound_on;
+            if(Player)
+                Player.GetComponent<AudioSource>().mute = !sound_on;
             //и префаба игрока
             PlayerPref.GetComponent<AudioSource>().mute = !sound_on;
         }
