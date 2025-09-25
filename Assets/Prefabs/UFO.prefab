@@ -141,6 +141,9 @@ MonoBehaviour:
   SoundExplosion: {fileID: 8300000, guid: 8ccb677e7f5cab741956468a46f34e81, type: 3}
   ExplosionPrefab: {fileID: 2131707643819409065, guid: aac49f9c357f57c45b8cc4e68e718bd8,
     type: 3}
+  MoveEvent:
+    m_PersistentCalls:
+      m_Calls: []
   PowerMove: 300
   Arrow: {fileID: 3687280338269063213, guid: 6d66051a42d745e41ad37b33ffa97374, type: 3}
   Player: {fileID: 0}
@@ -156,7 +159,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: c017da40ef9024a4e80bc5ecb303bbbd, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.114905715
   m_Pitch: 1
   Loop: 1
   Mute: 0

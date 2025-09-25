@@ -5,6 +5,9 @@ using UnityEngine.Events;
 //Класс представляющий космический корабль игрока
 public class PlayerSpaceShip : SpaceShip
 {
+    [SerializeField] private ParticleSystem _moveEffectPrefab;
+    [SerializeField] private Transform[] _effectPositions;
+
     //Событие выстрела
     public UnityEvent ShotEvent = new UnityEvent();
     //Префаб пули
@@ -13,6 +16,7 @@ public class PlayerSpaceShip : SpaceShip
     public float PowerShot;
     //Пауза для отсутствия взаимодействия с кораблем
     public bool pauseSpace;
+
     private void Awake()
     {
         //Инициализируем компоненты
@@ -22,6 +26,13 @@ public class PlayerSpaceShip : SpaceShip
         //Добавляем обработчик события ShotEvent
         ShotEvent.AddListener(shot);
     }
+       
+    private void OnEnable()
+    {
+        Debug.Log("Added Listener");
+        MoveEvent.AddListener(AfterMove);
+    }
+
     public void Update()
     {
         if(!pauseSpace)
@@ -55,5 +66,21 @@ public class PlayerSpaceShip : SpaceShip
         Bullet.transform.position = transform.position;
         //Задаем ей направление с заданной силой
         Bullet.GetComponent<Rigidbody2D>().AddForce(transform.up * PowerShot);
+    }
+
+    private void AfterMove()
+    {
+        for(int i = 0; i < _effectPositions.Length; i++)
+        {
+            ParticleSystem effect = Instantiate(_moveEffectPrefab);
+            effect.transform.position = _effectPositions[i].position;
+            effect.transform.rotation = transform.rotation;
+            Destroy(effect.gameObject, effect.main.startLifetime.constant + effect.main.duration);
+        }
+    }
+
+    private void OnDisable()
+    {
+        MoveEvent.RemoveListener(AfterMove);
     }
 }

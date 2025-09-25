@@ -5,7 +5,7 @@ using UnityEngine;
 //являющиеся космическими объектами
 public abstract class ExplosionObj : SpaceObj
 {
-    public static bool isOnSoundExp = true;
+    public static float VOLUME = 1f;
     public AudioClip SoundExplosion;
     //Ссылка на префаб взрыва
     public GameObject ExplosionPrefab;
@@ -21,17 +21,11 @@ public abstract class ExplosionObj : SpaceObj
         //Чистим событие DieEvent, чтобы не было повторных вызовов
         //при столкновении двух врагов
         DieEvent.RemoveAllListeners();
-        if(isOnSoundExp)
-        {
-            AudioSource Audio = exp.AddComponent<AudioSource>();
-            Audio.clip = SoundExplosion;
-            Audio.Play();
-            exp.GetComponent<ExplosionController>().LetsGo(Audio);
-        }
-        else
-        {
-            Destroy(exp.gameObject, 1);
-        }
+        AudioSource Audio = exp.AddComponent<AudioSource>();
+        Audio.clip = SoundExplosion;
+        Audio.volume = VOLUME;
+        Audio.Play();
+        exp.GetComponent<ExplosionController>().LetsGo(Audio);
     }
     //Функция столкновения взрывающегося объекта с другим объектом
     private void CollisionFunc(Collision2D collision)

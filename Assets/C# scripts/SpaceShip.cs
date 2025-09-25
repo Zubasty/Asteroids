@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 //Абстрактный класс представляющий космический корабль
 public abstract class SpaceShip : ExplosionObj
 {
+    public UnityEvent MoveEvent = new UnityEvent();
     //"Сила" движения
     public float PowerMove;
     //Ссылка на спрайт стрелки, используемой при вылете
@@ -88,6 +90,8 @@ public abstract class SpaceShip : ExplosionObj
     {
         //Задаем кораблю направление движения
         rigidbody.AddForce(vec * PowerMove);
+        MoveEvent?.Invoke();
+        Debug.Log("Толчок");
     }
     void die()
     {

@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class ControllerGame : MonoBehaviour
 {
+    [SerializeField] private Slider _sliderSound;
+    [SerializeField] private Slider _sliderMusic;
     //Переменная отвечающая за кол-во набранных очков
     int score = 0;
     //Время между спавнами врагов в начале игры
@@ -25,12 +27,8 @@ public class ControllerGame : MonoBehaviour
     public Button ExitButton;
     //Ссылка на спрайты вкл/выкл звук
     public Sprite[] SoundSprites;
-    //Ссылка на кнопку включения/выключения звука
-    public Button SoundButton;
     //Ссылка на спрайты вкл/выкл музыки
     public Sprite[] MusicSprites;
-    //Ссылка на кнопку вкл/выкл музыки
-    public Button MusicButton;
     //Ссылка на количество очков
     public Text ScoreText;
     //Ссылка на фоновую музыку                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
@@ -45,51 +43,6 @@ public class ControllerGame : MonoBehaviour
     List<Enemy> Enemies = new List<Enemy>();
     //Переменная отвечающая за паузу
     bool pause = true;
-    //Переменная отвечающая за музыку
-    bool music_on = true;
-    //Переменная отвечающая за звуки
-    bool sound_on = true;
-    //Свойство для включения и отключения звука
-    bool Sound_on
-    {
-        //Возвращаем значение sound_on
-        get { return sound_on; }
-        set
-        {
-            //Меняем значение sound_on
-            sound_on = value;
-            //Изменяем наличие звука взрыва у класса взрывающихся объектов
-            ExplosionObj.isOnSoundExp = sound_on;
-            //Перебираем всех уже созданных врагов
-            foreach(Enemy e in Enemies)
-            {
-                //если это вражеский космический корабль
-                if(e is EnemySpaceShip)
-                    //отключаем/включаем звук у вражеского космического корабля
-                    ((EnemySpaceShip)e).GetComponent<AudioSource>().mute = !sound_on;
-            }
-            //отключаем/включаем звук у префаба вражеского космического корабля
-            EnemySpacePref.GetComponent<AudioSource>().mute = !sound_on;
-            //отключаем/включаем звук у игрока
-            if(Player)
-                Player.GetComponent<AudioSource>().mute = !sound_on;
-            //и префаба игрока
-            PlayerPref.GetComponent<AudioSource>().mute = !sound_on;
-        }
-    }
-    //Свойство для включения и отключения музыки
-    bool Music_on
-    {
-        //Возвращаем значение music_on
-        get { return music_on; }
-        set
-        {
-            //Меняем значение music_on
-            music_on = value;
-            //Включаем/отключаем звук у MusicFon
-            MusicFon.mute = !music_on;
-        }
-    }
     //Свойство, отвечающее за кол-во очков
     int Score
     {
@@ -120,6 +73,29 @@ public class ControllerGame : MonoBehaviour
             //взаимодействие с ним на паузу
             if (Player) Player.pauseSpace = pause;
         }
+    }
+    public void ChangedMusicVolume(float volume)
+    {
+        MusicFon.volume = volume;
+    }
+    public void ChangedSoundVolume(float volume)
+    {
+        ExplosionObj.VOLUME = volume;
+        //Перебираем всех уже созданных врагов
+        foreach (Enemy e in Enemies)
+        {
+            //если это вражеский космический корабль
+            if (e is EnemySpaceShip)
+                //отключаем/включаем звук у вражеского космического корабля
+                ((EnemySpaceShip)e).GetComponent<AudioSource>().volume = volume;
+        }
+        //отключаем/включаем звук у префаба вражеского космического корабля
+        EnemySpacePref.GetComponent<AudioSource>().volume = volume;
+        //отключаем/включаем звук у игрока
+        if (Player)
+            Player.GetComponent<AudioSource>().volume = volume;
+        //и префаба игрока
+        PlayerPref.GetComponent<AudioSource>().volume = volume;
     }
     //Функция клика по кнопке пауза
     public void PauseClick()
@@ -195,30 +171,13 @@ public class ControllerGame : MonoBehaviour
         StartButton.onClick.AddListener(StartGame);
         //Добавляем обработчик клика по кнопке выход
         ExitButton.onClick.AddListener(delegate { Application.Quit(); });
-        //Добавляем обработчик клика по кнопке звука
-        SoundButton.onClick.AddListener(SoundSwitch);
-        //Добавляем обработчик клика по кнопке музыки
-        MusicButton.onClick.AddListener(MusicSwitch);
         //У префабов космических кораблей включаем звук
         PlayerPref.GetComponent<AudioSource>().mute = 
             EnemySpacePref.GetComponent<AudioSource>().mute = false;
-
-    }
-    //Функция для вкл/выкл звуков
-    void SoundSwitch()
-    {
-        //Меняем значение Sound_on
-        Sound_on = !Sound_on;
-        //И картинку на кнопке
-        SoundButton.GetComponent<Image>().sprite = SoundSprites[Sound_on ? 1 : 0];
-    }
-    //Функция для вкл/выкл музыки
-    void MusicSwitch()
-    {
-        //Меняем значение Music_on
-        Music_on = !Music_on;
-        //И картинку на кнопке
-        MusicButton.GetComponent<Image>().sprite = MusicSprites[Music_on ? 1 : 0];
+        _sliderSound.onValueChanged.AddListener(ChangedSoundVolume);
+        _sliderMusic.onValueChanged.AddListener(ChangedMusicVolume);
+        ChangedSoundVolume(_sliderSound.value);
+        ChangedMusicVolume(_sliderMusic.value);
     }
     //Функция старта игрового процесса
     void StartGame()
@@ -304,12 +263,14 @@ public class ControllerGame : MonoBehaviour
         //Перемещаем его немного выше, чем находится экземпляр
         //вражеского объекта
         txt.transform.Translate(0, 1, 0);
+        float alpha = txt.color.a;
         //До тех пор пока текст не стал полностью прозрачным
         while (txt.color.a>0)
         {
+            alpha -= Time.deltaTime / 3;
             //Увеличиваем его прозрачность
             txt.color = new Color(txt.color.r, txt.color.g, 
-                txt.color.b, txt.color.a - Time.deltaTime/3);
+                txt.color.b, alpha);
             //И перемещаем выше
             txt.transform.Translate(0, Time.deltaTime, 0);
             //Конец кадра
